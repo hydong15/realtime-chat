@@ -12,28 +12,70 @@
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
       #messages { margin-bottom: 40px }
+      #loginMsg { text-align: center; }
+      #logoutMsg { text-align: center; }
     </style>
   </head>
   <body>
     <ul id="messages"></ul>
     <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
+      <input id="msgForm" autocomplete="off" /><button>Send</button>
     </form>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       $(function () {
+        // socket.io 서버에 접속한다
         var socket = io();
-        $('form').submit(function(e){
-          e.preventDefault(); // prevents page reloading
-          socket.emit('chat message', $('#m').val());
-          $('#m').val('');
-          return false;
+        
+        // 서버로 자신의 정보를 전송한다
+        socket.emit("login", {
+          name: makeRandomName(),
+          userid: makeRandomName() + "@gmail.com"
         });
-        socket.on('chat message', function(msg){
-          $('#messages').append($('<li>').text(msg));
-            window.scrollTo(0, document.body.scrollHeight);
+
+        // 서버로부터의 login 메시지가 수신되면
+        socket.on("login", function(data){
+          $("#messages").append($("<li id=\"loginMsg\"><strong>" + data + "</strong> joined</li>"));
+          //auto scroll down
+          window.scrollTo(0, document.body.scrollHeight);
         });
+
+        // 서버로부터의 disconnect 메시지가 수신되면
+        socket.on("disconnect", function(data){
+          $("#messages").append($("<li id=\"logoutMsg\"><strong>" + data + "</strong> left</li>"));
+          //auto scroll down
+          window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        // 서버로부터의 chat 메시지가 수신되면
+        socket.on("chat", function(data){
+          $("#messages").append("<li>" + data.msg + " : from <strong>" + data.from.name + "</strong></li>");
+          //auto scroll down
+          window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        //Send 버튼이 클릭되면
+        $("form").submit(function(e){
+          // prevents page reloading
+          e.preventDefault();
+          var $msgForm = $("#msgForm");
+
+          //서버로 chat 메시지를 전송한다
+          socket.emit("chat", { msg: $msgForm.val() });
+          $msgForm.val("");
+        });
+
+        function makeRandomName(){
+          var name = "";
+          var possible = "abcdefghijklmnopqrstuvwxyz";
+
+          for(var i = 0; i < 5; i++){
+            name += possible.charAt(Math.floor(Math.random() * possible.length));
+          }
+
+          return name;
+        }
       });
     </script>
   </body>

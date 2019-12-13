@@ -11,8 +11,10 @@ app.get('/', function(req, res){
 // connection이 수립되면 event handler function의 인자로 socket이 들어온다
 io.on('connection', function(socket){
   // 접속한 클라이언트의 정보가 수신되면
+  // event name: 클라이언트가 메시지 송신 시 지정한 event name
+  // function: event handler
   socket.on('login', function(data){
-    console.log('Client logged-in:\n name: ' + data.name + '\n userid: ' + data.userid);
+    console.log('\nClient logged-in:\n name: ' + data.name + '\n userid: ' + data.userid);
 
     // socket에 클라이언트 정보를 저장한다
     socket.name = data.name;
@@ -24,7 +26,7 @@ io.on('connection', function(socket){
 
   // 클라이언트로부터의 메시지가 수신되면
   socket.on('chat', function(data){
-    console.log('Message from %s: %s', socket.name, data.msg);
+    console.log('\nMessage from %s: %s', socket.name, data.msg);
 
     var msg = {
       from: {
@@ -38,7 +40,7 @@ io.on('connection', function(socket){
     socket.broadcast.emit('chat', msg);
 
     // 메시지를 전송한 클라이언트에게만 메시지를 전송한다
-    // scoket.emit('s2c chat', msg);
+    // socket.emit('s2c chat', msg);
 
     // 접속된 모든 클라이언트에게 메시지를 전송한다
     // io.emit('s2c chat', msg);
@@ -53,7 +55,8 @@ io.on('connection', function(socket){
   });
 
   socket.on('disconnect', function(){
-    console.log('user disconnected: ' + socket.name);
+    console.log('\nuser disconnected: ' + socket.name);
+    io.emit('disconnect', socket.name);
   });
 });
 
