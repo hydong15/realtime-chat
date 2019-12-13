@@ -17,7 +17,7 @@
   <body>
     <ul id="messages"></ul>
     <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
+      <input id="msgForm" autocomplete="off" /><button>Send</button>
     </form>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
@@ -29,17 +29,28 @@
         // 서버로 자신의 정보를 전송한다
         socket.emit("login", {
           name: makeRandomName(),
-          userid: "hydong15@gmail.com"
+          userid: makeRandomName() + "@gmail.com"
         });
 
-        // 서버로부터의 메시지가 수신되면
+        // 서버로부터의 login 메시지가 수신되면
         socket.on("login", function(data){
-          $("#chatLogs").append("<div><string>" + data + "</strong> has joined</div>");
+          $("#messages").append($("<li><strong>" + data + "</strong> has joined</li>"));
+          //auto scroll down
+          window.scrollTo(0, document.body.scrollHeight);
         });
 
-        // 서버로부터의 메시지가 수신되면
+        // 서버로부터의 disconnect 메시지가 수신되면
+        socket.on("disconnect", function(data){
+          $("#messages").append($("<li><strong>" + data + "</strong> has exited</li>"));
+          //auto scroll down
+          window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        // 서버로부터의 chat 메시지가 수신되면
         socket.on("chat", function(data){
-          $("#chatLogs").append("<div>" + data.msg + " : from <strong>" + data.from.name + "</strong></div>");
+          $("#messages").append("<li>" + data.msg + " : from <strong>" + data.from.name + "</strong></li>");
+          //auto scroll down
+          window.scrollTo(0, document.body.scrollHeight);
         });
 
         //Send 버튼이 클릭되면
@@ -48,21 +59,16 @@
           e.preventDefault();
           var $msgForm = $("#msgForm");
 
-          //서버로 메시지를 전송한다
+          //서버로 chat 메시지를 전송한다
           socket.emit("chat", { msg: $msgForm.val() });
           $msgForm.val("");
-        });
-
-        socket.on('chat', function(msg){
-          $('#messages').append($('<li>').text(msg));
-            window.scrollTo(0, document.body.scrollHeight);
         });
 
         function makeRandomName(){
           var name = "";
           var possible = "abcdefghijklmnopqrstuvwxyz";
 
-          for(var i = 0; i < 3; i++){
+          for(var i = 0; i < 5; i++){
             name += possible.charAt(Math.floor(Math.random() * possible.length));
           }
 
