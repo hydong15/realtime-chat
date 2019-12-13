@@ -23,17 +23,51 @@
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       $(function () {
+        // socket.io 서버에 접속한다
         var socket = io();
-        $('form').submit(function(e){
-          e.preventDefault(); // prevents page reloading
-          socket.emit('chat message', $('#m').val());
-          $('#m').val('');
-          return false;
+        
+        // 서버로 자신의 정보를 전송한다
+        socket.emit("login", {
+          name: makeRandomName(),
+          userid: "hydong15@gmail.com"
         });
-        socket.on('chat message', function(msg){
+
+        // 서버로부터의 메시지가 수신되면
+        socket.on("login", function(data){
+          $("#chatLogs").append("<div><string>" + data + "</strong> has joined</div>");
+        });
+
+        // 서버로부터의 메시지가 수신되면
+        socket.on("chat", function(data){
+          $("#chatLogs").append("<div>" + data.msg + " : from <strong>" + data.from.name + "</strong></div>");
+        });
+
+        //Send 버튼이 클릭되면
+        $("form").submit(function(e){
+          // prevents page reloading
+          e.preventDefault();
+          var $msgForm = $("#msgForm");
+
+          //서버로 메시지를 전송한다
+          socket.emit("chat", { msg: $msgForm.val() });
+          $msgForm.val("");
+        });
+
+        socket.on('chat', function(msg){
           $('#messages').append($('<li>').text(msg));
             window.scrollTo(0, document.body.scrollHeight);
         });
+
+        function makeRandomName(){
+          var name = "";
+          var possible = "abcdefghijklmnopqrstuvwxyz";
+
+          for(var i = 0; i < 3; i++){
+            name += possible.charAt(Math.floor(Math.random() * possible.length));
+          }
+
+          return name;
+        }
       });
     </script>
   </body>
