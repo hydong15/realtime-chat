@@ -40,7 +40,7 @@ io.on('connection', function(socket){
     socket.broadcast.emit('chat', msg);
 
     // 메시지를 전송한 클라이언트에게만 메시지를 전송한다
-    // scoket.emit('s2c chat', msg);
+    // socket.emit('s2c chat', msg);
 
     // 접속된 모든 클라이언트에게 메시지를 전송한다
     // io.emit('s2c chat', msg);

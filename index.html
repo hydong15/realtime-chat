@@ -12,6 +12,8 @@
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
       #messages { margin-bottom: 40px }
+      #loginMsg { text-align: center; }
+      #logoutMsg { text-align: center; }
     </style>
   </head>
   <body>
@@ -34,14 +36,14 @@
 
         // 서버로부터의 login 메시지가 수신되면
         socket.on("login", function(data){
-          $("#messages").append($("<li><strong>" + data + "</strong> has joined</li>"));
+          $("#messages").append($("<li id=\"loginMsg\"><strong>" + data + "</strong> joined</li>"));
           //auto scroll down
           window.scrollTo(0, document.body.scrollHeight);
         });
 
         // 서버로부터의 disconnect 메시지가 수신되면
         socket.on("disconnect", function(data){
-          $("#messages").append($("<li><strong>" + data + "</strong> has exited</li>"));
+          $("#messages").append($("<li id=\"logoutMsg\"><strong>" + data + "</strong> left</li>"));
           //auto scroll down
           window.scrollTo(0, document.body.scrollHeight);
         });
